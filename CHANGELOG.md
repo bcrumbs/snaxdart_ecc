@@ -1,3 +1,7 @@
+## 0.3.3
+
+- migrate to Snax
+
 ## 0.3.2
 
 - fix signature bug
@@ -21,7 +25,7 @@
 
 ## 0.2.0
 
-- EOSPublicKey, EOSPrivateKey, EOSSignature
+- SNAXPublicKey, SNAXPrivateKey, SNAXSignature
 - Sign the data
 - Verify the signature
 
