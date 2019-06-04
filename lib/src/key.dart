@@ -10,40 +10,41 @@ import './exception.dart';
 import './key_base.dart';
 import './signature.dart';
 
-/// EOS Public Key
-class EOSPublicKey extends EOSKey {
+/// SNAX Public Key
+class SNAXPublicKey extends SNAXKey {
   ECPoint q;
 
-  /// Construct EOS public key from buffer
-  EOSPublicKey.fromPoint(this.q);
+  /// Construct SNAX public key from buffer
+  SNAXPublicKey.fromPoint(this.q);
 
-  /// Construct EOS public key from string
-  factory EOSPublicKey.fromString(String keyStr) {
+  /// Construct SNAX public key from string
+  factory SNAXPublicKey.fromString(String keyStr) {
     RegExp publicRegex = RegExp(r"^PUB_([A-Za-z0-9]+)_([A-Za-z0-9]+)",
         caseSensitive: true, multiLine: false);
     Iterable<Match> match = publicRegex.allMatches(keyStr);
 
     if (match.isEmpty) {
-      RegExp eosRegex = RegExp(r"^EOS", caseSensitive: true, multiLine: false);
-      if (!eosRegex.hasMatch(keyStr)) {
-        throw InvalidKey("No leading EOS");
+      RegExp snaxRegex =
+          RegExp(r"^SNAX", caseSensitive: true, multiLine: false);
+      if (!snaxRegex.hasMatch(keyStr)) {
+        throw InvalidKey("No leading SNAX");
       }
-      String publicKeyStr = keyStr.substring(3);
-      Uint8List buffer = EOSKey.decodeKey(publicKeyStr);
-      return EOSPublicKey.fromBuffer(buffer);
+      String publicKeyStr = keyStr.substring(4);
+      Uint8List buffer = SNAXKey.decodeKey(publicKeyStr);
+      return SNAXPublicKey.fromBuffer(buffer);
     } else if (match.length == 1) {
       Match m = match.first;
       String keyType = m.group(1);
-      Uint8List buffer = EOSKey.decodeKey(m.group(2), keyType);
-      return EOSPublicKey.fromBuffer(buffer);
+      Uint8List buffer = SNAXKey.decodeKey(m.group(2), keyType);
+      return SNAXPublicKey.fromBuffer(buffer);
     } else {
       throw InvalidKey('Invalid public key format');
     }
   }
 
-  factory EOSPublicKey.fromBuffer(Uint8List buffer) {
-    ECPoint point = EOSKey.secp256k1.curve.decodePoint(buffer);
-    return EOSPublicKey.fromPoint(point);
+  factory SNAXPublicKey.fromBuffer(Uint8List buffer) {
+    ECPoint point = SNAXKey.secp256k1.curve.decodePoint(buffer);
+    return SNAXPublicKey.fromPoint(point);
   }
 
   Uint8List toBuffer() {
@@ -52,24 +53,24 @@ class EOSPublicKey extends EOSKey {
   }
 
   String toString() {
-    return 'EOS' + EOSKey.encodeKey(this.toBuffer(), keyType);
+    return 'SNAX' + SNAXKey.encodeKey(this.toBuffer(), keyType);
   }
 }
 
-/// EOS Private Key
-class EOSPrivateKey extends EOSKey {
+/// SNAX Private Key
+class SNAXPrivateKey extends SNAXKey {
   Uint8List d;
   String format;
 
   BigInt _r;
   BigInt _s;
 
-  /// Constructor EOS private key from the key buffer itself
-  EOSPrivateKey.fromBuffer(this.d);
+  /// Constructor SNAX private key from the key buffer itself
+  SNAXPrivateKey.fromBuffer(this.d);
 
   /// Construct the private key from string
   /// It can come from WIF format for PVT format
-  EOSPrivateKey.fromString(String keyStr) {
+  SNAXPrivateKey.fromString(String keyStr) {
     RegExp privateRegex = RegExp(r"^PVT_([A-Za-z0-9]+)_([A-Za-z0-9]+)",
         caseSensitive: true, multiLine: false);
     Iterable<Match> match = privateRegex.allMatches(keyStr);
@@ -78,9 +79,10 @@ class EOSPrivateKey extends EOSKey {
       format = 'WIF';
       keyType = 'K1';
       // WIF
-      Uint8List keyWLeadingVersion = EOSKey.decodeKey(keyStr, EOSKey.SHA256X2);
+      Uint8List keyWLeadingVersion =
+          SNAXKey.decodeKey(keyStr, SNAXKey.SHA256X2);
       int version = keyWLeadingVersion.first;
-      if (EOSKey.VERSION != version) {
+      if (SNAXKey.VERSION != version) {
         throw InvalidKey("version mismatch");
       }
 
@@ -97,21 +99,21 @@ class EOSPrivateKey extends EOSKey {
       format = 'PVT';
       Match m = match.first;
       keyType = m.group(1);
-      d = EOSKey.decodeKey(m.group(2), keyType);
+      d = SNAXKey.decodeKey(m.group(2), keyType);
     } else {
       throw InvalidKey('Invalid Private Key format');
     }
   }
 
-  /// Generate EOS private key from seed. Please note: This is not random!
+  /// Generate SNAX private key from seed. Please note: This is not random!
   /// For the given seed, the generated key would always be the same
-  factory EOSPrivateKey.fromSeed(String seed) {
+  factory SNAXPrivateKey.fromSeed(String seed) {
     Digest s = sha256.convert(utf8.encode(seed));
-    return EOSPrivateKey.fromBuffer(s.bytes);
+    return SNAXPrivateKey.fromBuffer(s.bytes);
   }
 
-  /// Generate the random EOS private key
-  factory EOSPrivateKey.fromRandom() {
+  /// Generate the random SNAX private key
+  factory SNAXPrivateKey.fromRandom() {
     final int randomLimit = 1 << 32;
     Random randomGenerator;
     try {
@@ -134,35 +136,35 @@ class EOSPrivateKey extends EOSKey {
     entropy.addAll(entropy3);
     Uint8List randomKey = Uint8List.fromList(entropy);
     Digest d = sha256.convert(randomKey);
-    return EOSPrivateKey.fromBuffer(d.bytes);
+    return SNAXPrivateKey.fromBuffer(d.bytes);
   }
 
   /// Check if the private key is WIF format
   bool isWIF() => this.format == 'WIF';
 
   /// Get the public key string from this private key
-  EOSPublicKey toEOSPublicKey() {
+  SNAXPublicKey toSNAXPublicKey() {
     BigInt privateKeyNum = decodeBigInt(this.d);
-    ECPoint ecPoint = EOSKey.secp256k1.G * privateKeyNum;
+    ECPoint ecPoint = SNAXKey.secp256k1.G * privateKeyNum;
 
-    return EOSPublicKey.fromPoint(ecPoint);
+    return SNAXPublicKey.fromPoint(ecPoint);
   }
 
   /// Sign the bytes data using the private key
-  EOSSignature sign(Uint8List data) {
+  SNAXSignature sign(Uint8List data) {
     Digest d = sha256.convert(data);
     return signHash(d.bytes);
   }
 
   /// Sign the string data using the private key
-  EOSSignature signString(String data) {
+  SNAXSignature signString(String data) {
     return sign(utf8.encode(data));
   }
 
   /// Sign the SHA256 hashed data using the private key
-  EOSSignature signHash(Uint8List sha256Data) {
+  SNAXSignature signHash(Uint8List sha256Data) {
     int nonce = 0;
-    BigInt n = EOSKey.secp256k1.n;
+    BigInt n = SNAXKey.secp256k1.n;
     BigInt e = decodeBigInt(sha256Data);
 
     while (true) {
@@ -173,27 +175,27 @@ class EOSPrivateKey extends EOSKey {
       }
       ECSignature sig = ECSignature(_r, _s);
 
-      Uint8List der = EOSSignature.ecSigToDER(sig);
+      Uint8List der = SNAXSignature.ecSigToDER(sig);
 
       int lenR = der.elementAt(3);
       int lenS = der.elementAt(5 + lenR);
       if (lenR == 32 && lenS == 32) {
-        int i = EOSSignature.calcPubKeyRecoveryParam(
-            decodeBigInt(sha256Data), sig, this.toEOSPublicKey());
+        int i = SNAXSignature.calcPubKeyRecoveryParam(
+            decodeBigInt(sha256Data), sig, this.toSNAXPublicKey());
         i += 4; // compressed
         i += 27; // compact  //  24 or 27 :( forcing odd-y 2nd key candidate)
-        return EOSSignature(i, sig.r, sig.s);
+        return SNAXSignature(i, sig.r, sig.s);
       }
     }
   }
 
   String toString() {
     List<int> version = List<int>();
-    version.add(EOSKey.VERSION);
+    version.add(SNAXKey.VERSION);
     Uint8List keyWLeadingVersion =
-        EOSKey.concat(Uint8List.fromList(version), this.d);
+        SNAXKey.concat(Uint8List.fromList(version), this.d);
 
-    return EOSKey.encodeKey(keyWLeadingVersion, EOSKey.SHA256X2);
+    return SNAXKey.encodeKey(keyWLeadingVersion, SNAXKey.SHA256X2);
   }
 
   BigInt _deterministicGenerateK(
@@ -245,7 +247,7 @@ class EOSPrivateKey extends EOSKey {
     BigInt T = decodeBigInt(v);
     // Step H3, repeat until T is within the interval [1, n - 1]
     while (T.sign <= 0 ||
-        T.compareTo(EOSKey.secp256k1.n) >= 0 ||
+        T.compareTo(SNAXKey.secp256k1.n) >= 0 ||
         !_checkSig(e, newHash, T)) {
       List<int> d3 = List.from(v)..add(0);
       k = hMacSha256.convert(d3).bytes;
@@ -261,8 +263,8 @@ class EOSPrivateKey extends EOSKey {
   }
 
   bool _checkSig(BigInt e, Uint8List hash, BigInt k) {
-    BigInt n = EOSKey.secp256k1.n;
-    ECPoint Q = EOSKey.secp256k1.G * k;
+    BigInt n = SNAXKey.secp256k1.n;
+    ECPoint Q = SNAXKey.secp256k1.G * k;
 
     if (Q.isInfinity) {
       return false;
@@ -273,7 +275,7 @@ class EOSPrivateKey extends EOSKey {
       return false;
     }
 
-    _s = k.modInverse(EOSKey.secp256k1.n) * (e + decodeBigInt(d) * _r) % n;
+    _s = k.modInverse(SNAXKey.secp256k1.n) * (e + decodeBigInt(d) * _r) % n;
     if (_s.sign == 0) {
       return false;
     }

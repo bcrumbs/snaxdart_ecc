@@ -1,32 +1,32 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:eosdart_ecc/eosdart_ecc.dart';
+import 'package:snaxdart_ecc/snaxdart_ecc.dart';
 import 'package:test/test.dart';
 import 'package:crypto/crypto.dart';
 
 void main() {
-  group('EOS signature tests', () {
-    test('Construct EOS signature from string', () {
+  group('SNAX signature tests', () {
+    test('Construct SNAX signature from string', () {
       String sigStr =
           'SIG_K1_Kg417TSLuhzSpU2bGa21kD1UNaTfAZSCcKmKpZ6fnx3Nqu22gzG3ND4Twur7bzX8oS1J91JvV4rMJcFycGqFBSaY2SJcEQ';
-      EOSSignature signature = EOSSignature.fromString(sigStr);
+      SNAXSignature signature = SNAXSignature.fromString(sigStr);
       print(signature);
 
       expect(sigStr, signature.toString());
     });
 
     test('Sign the hash using private key', () {
-      EOSPrivateKey privateKey = EOSPrivateKey.fromString(
+      SNAXPrivateKey privateKey = SNAXPrivateKey.fromString(
           '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
-      EOSPublicKey publicKey = privateKey.toEOSPublicKey();
+      SNAXPublicKey publicKey = privateKey.toSNAXPublicKey();
       String expectedSig =
           'SIG_K1_Kg417TSLuhzSpU2bGa21kD1UNaTfAZSCcKmKpZ6fnx3Nqu22gzG3ND4Twur7bzX8oS1J91JvV4rMJcFycGqFBSaY2SJcEQ';
 
       String data = 'data';
       Uint8List hashData = sha256.convert(utf8.encode(data)).bytes;
-      EOSSignature signature = privateKey.signHash(hashData);
-      EOSSignature signature2 = privateKey.signString(data);
+      SNAXSignature signature = privateKey.signHash(hashData);
+      SNAXSignature signature2 = privateKey.signString(data);
 
       print(signature.toString());
       expect(expectedSig, signature.toString());
@@ -38,9 +38,9 @@ void main() {
     });
 
     test('Sign the hash using private key', () {
-      EOSPrivateKey privateKey = EOSPrivateKey.fromString(
+      SNAXPrivateKey privateKey = SNAXPrivateKey.fromString(
           '5HxT6prWB8VuXkoAaX3eby8bWjquMtCvGuakhC8tGEiPSHfsQLR');
-      EOSPublicKey publicKey = privateKey.toEOSPublicKey();
+      SNAXPublicKey publicKey = privateKey.toSNAXPublicKey();
       String expectedSig =
           'SIG_K1_Kdfe9wknSAKBmgwb3L53CG8KosoHhZ69oVEJrrH5YuWx4JVcJdn1ZV3MU25AVho4mPbeSKW79DVTBAAWj7zGbHTByF1JXU';
 
@@ -79,7 +79,7 @@ void main() {
         201
       ];
       Uint8List hashData = Uint8List.fromList(l);
-      EOSSignature signature = privateKey.signHash(hashData);
+      SNAXSignature signature = privateKey.signHash(hashData);
 
       expect(expectedSig, signature.toString());
       print(signature.toString());
@@ -87,9 +87,9 @@ void main() {
     });
 
     test('Sign the hash using private key', () {
-      EOSPrivateKey privateKey = EOSPrivateKey.fromString(
+      SNAXPrivateKey privateKey = SNAXPrivateKey.fromString(
           '5J9b3xMkbvcT6gYv2EpQ8FD4ZBjgypuNKwE1jxkd7Wd1DYzhk88');
-      EOSPublicKey publicKey = privateKey.toEOSPublicKey();
+      SNAXPublicKey publicKey = privateKey.toSNAXPublicKey();
       String expectedSig =
           'SIG_K1_KWfDGxwogny1PUiBAYTfKwPsCSNvM7zWgmXyChdYayZFfyPjddpBUYVdJTq1PjC3PRXADRsqWVU1N2SMQivBDqA7AaRzmB';
 
@@ -128,7 +128,7 @@ void main() {
         142
       ];
       Uint8List hashData = Uint8List.fromList(l);
-      EOSSignature signature = privateKey.signHash(hashData);
+      SNAXSignature signature = privateKey.signHash(hashData);
 
       expect(expectedSig, signature.toString());
       print(signature.toString());

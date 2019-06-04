@@ -14,19 +14,19 @@ import './exception.dart';
 import './key.dart';
 import './key_base.dart';
 
-/// EOS Signature
-class EOSSignature extends EOSKey {
+/// SNAX Signature
+class SNAXSignature extends SNAXKey {
   int i;
   ECSignature ecSig;
 
   /// Default constructor from i, r, s
-  EOSSignature(this.i, BigInt r, BigInt s) {
+  SNAXSignature(this.i, BigInt r, BigInt s) {
     this.keyType = 'K1';
     this.ecSig = ECSignature(r, s);
   }
 
-  /// Construct EOS signature from buffer
-  EOSSignature.fromBuffer(Uint8List buffer, String keyType) {
+  /// Construct SNAX signature from buffer
+  SNAXSignature.fromBuffer(Uint8List buffer, String keyType) {
     this.keyType = keyType;
 
     if (buffer.lengthInBytes != 65) {
@@ -45,8 +45,8 @@ class EOSSignature extends EOSKey {
     this.ecSig = ECSignature(r, s);
   }
 
-  /// Construct EOS signature from string
-  factory EOSSignature.fromString(String signatureStr) {
+  /// Construct SNAX signature from string
+  factory SNAXSignature.fromString(String signatureStr) {
     RegExp sigRegex = RegExp(r"^SIG_([A-Za-z0-9]+)_([A-Za-z0-9]+)",
         caseSensitive: true, multiLine: false);
     Iterable<Match> match = sigRegex.allMatches(signatureStr);
@@ -54,25 +54,25 @@ class EOSSignature extends EOSKey {
     if (match.length == 1) {
       Match m = match.first;
       String keyType = m.group(1);
-      Uint8List key = EOSKey.decodeKey(m.group(2), keyType);
-      return EOSSignature.fromBuffer(key, keyType);
+      Uint8List key = SNAXKey.decodeKey(m.group(2), keyType);
+      return SNAXSignature.fromBuffer(key, keyType);
     }
 
-    throw InvalidKey("Invalid EOS signature");
+    throw InvalidKey("Invalid SNAX signature");
   }
 
   /// Verify the signature of the string data
-  bool verify(String data, EOSPublicKey publicKey) {
+  bool verify(String data, SNAXPublicKey publicKey) {
     Digest d = sha256.convert(utf8.encode(data));
 
     return verifyHash(d.bytes, publicKey);
   }
 
   /// Verify the signature from in SHA256 hashed data
-  bool verifyHash(Uint8List sha256Data, EOSPublicKey publicKey) {
+  bool verifyHash(Uint8List sha256Data, SNAXPublicKey publicKey) {
     ECPoint q = publicKey.q;
     final signer = ECDSASigner(null, HMac(SHA256Digest(), 64));
-    signer.init(false, PublicKeyParameter(ECPublicKey(q, EOSKey.secp256k1)));
+    signer.init(false, PublicKeyParameter(ECPublicKey(q, SNAXKey.secp256k1)));
 
     return signer.verifySignature(sha256Data, this.ecSig);
   }
@@ -84,13 +84,13 @@ class EOSSignature extends EOSKey {
     b.addAll(encodeBigInt(this.ecSig.s));
 
     Uint8List buffer = Uint8List.fromList(b);
-    return 'SIG_${keyType}_${EOSKey.encodeKey(buffer, keyType)}';
+    return 'SIG_${keyType}_${SNAXKey.encodeKey(buffer, keyType)}';
   }
 
   /// ECSignature to DER format bytes
   static Uint8List ecSigToDER(ECSignature ecSig) {
-    List<int> r = EOSKey.toSigned(encodeBigInt(ecSig.r));
-    List<int> s = EOSKey.toSigned(encodeBigInt(ecSig.s));
+    List<int> r = SNAXKey.toSigned(encodeBigInt(ecSig.r));
+    List<int> s = SNAXKey.toSigned(encodeBigInt(ecSig.s));
 
     List<int> b = List();
     b.add(0x02);
@@ -109,7 +109,7 @@ class EOSSignature extends EOSKey {
 
   /// Find the public key recovery factor
   static int calcPubKeyRecoveryParam(
-      BigInt e, ECSignature ecSig, EOSPublicKey publicKey) {
+      BigInt e, ECSignature ecSig, SNAXPublicKey publicKey) {
     for (int i = 0; i < 4; i++) {
       ECPoint Qprime = recoverPubKey(e, ecSig, i);
       if (Qprime == publicKey.q) {
@@ -119,10 +119,10 @@ class EOSSignature extends EOSKey {
     throw 'Unable to find valid recovery factor';
   }
 
-  /// Recovery EOS public key from ECSignature
+  /// Recovery SNAX public key from ECSignature
   static ECPoint recoverPubKey(BigInt e, ECSignature ecSig, int i) {
-    BigInt n = EOSKey.secp256k1.n;
-    ECPoint G = EOSKey.secp256k1.G;
+    BigInt n = SNAXKey.secp256k1.n;
+    ECPoint G = SNAXKey.secp256k1.G;
 
     BigInt r = ecSig.r;
     BigInt s = ecSig.s;
@@ -136,7 +136,7 @@ class EOSSignature extends EOSKey {
 
     // 1.1 Let x = r + jn
     BigInt x = isSecondKey > 0 ? r + n : r;
-    ECPoint R = EOSKey.secp256k1.curve.decompressPoint(isYOdd, x);
+    ECPoint R = SNAXKey.secp256k1.curve.decompressPoint(isYOdd, x);
     ECPoint nR = R * n;
     if (!nR.isInfinity) {
       throw 'nR is not a valid curve point';
