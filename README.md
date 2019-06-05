@@ -2,7 +2,7 @@
 
 Elliptic curve cryptography lib for EOS based blockchain in Dart lang.
 
-[![Build Status](https://travis-ci.com/primes-network/snaxdart_ecc.svg?branch=master)](https://travis-ci.com/primes-network/snaxdart_ecc)
+[![Build Status](https://travis-ci.org/bcrumbs/snaxdart_ecc.svg?branch=master)](https://travis-ci.org/bcrumbs/snaxdart_ecc)
 
 ## Usage
 

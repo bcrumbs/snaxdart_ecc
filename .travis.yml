@@ -3,3 +3,17 @@ dart_task:
 - dartfmt: sdk
 - test
 - dartanalyzer: true
+
+before_deploy:
+  - pub publish --dry-run
+  - chmod +x ./.travis/publish.sh
+  - mv ./.travis ../
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: '../.travis/publish.sh'
+  on:
+    tags: true
+cache:
+  directories:
+    - $HOME/.pub-cache

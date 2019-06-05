@@ -2,7 +2,7 @@ name: snaxdart_ecc
 description: Elliptic curve cryptography functions in Dart. Private Key, Public Key, Signature, AES, Encryption, Decryption
 version: 1.0.0
 homepage: https://github.com/bcrumbs/snaxdart_ecc
-author: bcrumbs
+author: bcrumbs <hello@braincrumbs.io>
 
 environment:
   sdk: ">=2.0.0 <3.0.0"
