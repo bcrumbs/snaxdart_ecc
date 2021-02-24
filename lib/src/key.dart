@@ -119,7 +119,7 @@ class SNAXPrivateKey extends SNAXKey {
     try {
       randomGenerator = Random.secure();
     } catch (e) {
-      randomGenerator = new Random();
+      randomGenerator = Random();
     }
 
     int randomInt1 = randomGenerator.nextInt(randomLimit);
